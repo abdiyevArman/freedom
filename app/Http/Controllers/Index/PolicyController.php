@@ -37,7 +37,28 @@ class PolicyController extends Controller
     {
         $this->lang = Helpers::getSessionLang();
     }
-    
+
+    public function showPolicy($hash,$pdf){
+        $url = '/policy/'.$hash.'/'.$pdf;
+        $policy = Policy::where('pdf_hash_url',$url)->first();
+
+        if($policy == null) abort(404);
+
+        $path = public_path($policy->pdf_file);
+
+        if (!File::exists($path)) {
+            abort(404);
+        }
+
+        $file = File::get($path);
+        $type = File::mimeType($path);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+
+        return $response;
+    }
+
     public function rejectPolicy(Request $request){
         $validator = Validator::make($request->all(), [
             'policy_id' => 'required'

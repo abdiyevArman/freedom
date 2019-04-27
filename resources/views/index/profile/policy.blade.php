@@ -62,13 +62,13 @@
                                         <div class="user-card__text">
                                             <img src="/static/img/general/ic-price.svg" class="mr-3" alt="">{{$item['cost']}} тг
                                         </div>
-                                        {{--<div class="user-card__text">
-                                            <img src="/static/img/general/ic-date.svg" class="mr-3" alt="">до 20.02.2020
-                                        </div>--}}
+                                        <div class="user-card__text">
+                                            <img src="/static/img/general/ic-date.svg" class="mr-3" alt="">до {{\App\Http\Helpers::getDateFormat3($item['policy_finish_date'])}}
+                                        </div>
                                         <div class="my-4"></div>
-                                        <a target="_blank" href="{{$item->pdf_file}}" class="button -green user-card__button">{{Lang::get('app.view')}}</a>
+                                        <a target="_blank" href="{{$item->pdf_hash_url}}" class="button -green user-card__button">{{Lang::get('app.view')}}</a>
                                        {{-- <a href="#" class="button -bordered_gray user-card__button">Добавить водителя</a>--}}
-                                        <a href="/insurance" class="button -bordered_gray user-card__button">{{Lang::get('app.insurance_event')}}</a>
+                                        <a target="_blank" href="/insurance" class="button -bordered_gray user-card__button">{{Lang::get('app.insurance_event')}}</a>
                                         <a href="javascript:void(0)" onclick="rejectPolicyModal('{{$item->policy_id}}')" class="button -bordered_gray user-card__button">{{Lang::get('app.reject')}}</a>
                                     </div>
                                 </div>

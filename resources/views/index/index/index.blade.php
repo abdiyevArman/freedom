@@ -51,7 +51,7 @@
                         <a href="javascript:void(0)" onclick="setFocusRequest()" class="button -bordered_white auto__button">{{Lang::get('app.send_request')}}</a>
                     </div>
                     <div class="auto__img">
-                        <img src="/static/img/content/bmw.jpg" alt="">
+                        <img src="{!! \App\Http\Helpers::getInfoImage(19) !!}" alt="">
                     </div>
                 </div>
             </div>

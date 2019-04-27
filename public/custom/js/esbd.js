@@ -76,7 +76,7 @@ function getInfoByINN(iin) {
                 $('#message_content').html('');
                 $('.calc__agree').fadeIn(0);
 
-                if(v_grade < 4){
+                if(v_grade < 3){
                     $('.calc__agree').fadeOut(0);
                     var content = '<div class="calc__total">Ваш класс не подходит, чтобы купить этот полис</div>';
                     $('#message_content').html(content);
@@ -98,6 +98,7 @@ function getInfoByINN(iin) {
                     g_cost = data.total_cost;
                     before_total_cost = data.total_cost;
                     g_transport_name = data.transport_name;
+                    g_transport_number = data.transport_number;
 
                     checked_is_kasko = data.kasko;
                     checked_is_is_need_dgpo = data.ogpo_plus;
@@ -108,13 +109,13 @@ function getInfoByINN(iin) {
                     $('#kasko_cost_label').css('display','none');
                     $('#dgpo_cost_label').css('display','none');
 
-                    if(checked_is_kasko == 1){
+                    if(checked_is_kasko > 0){
                         $('#is_need_kasko').prop('checked', true);
                         $('#kasko_cost_label').css('display','block');
                         $('#cancel_additional').prop('checked', false);
                     }
 
-                    if(checked_is_is_need_dgpo == 1){
+                    if(checked_is_is_need_dgpo > 0){
                         $('#is_need_dgpo').prop('checked', true);
                         $('#dgpo_cost_label').css('display','block');
                         $('#cancel_additional').prop('checked', false);
@@ -144,6 +145,7 @@ var g_exist_auto = 0;
 
 g_policy_id = 0;
 g_transport_name = '';
+g_transport_number = '';
 
 g_is_click_calculate_btn = 0;
 
@@ -244,8 +246,6 @@ function calculateOGPO(){
             transport_years: transport_year,
             transport_regions: transport_region,
             transport_vins: transport_vin,
-            is_need_kasko: $('#is_need_kasko').is(':checked'),
-            is_need_ogpo_plus: $('#is_need_dgpo').is(':checked'),
             is_has_discount: $('#is_has_discount').is(':checked')
         },
         success: function (data) {
@@ -278,7 +278,14 @@ function calculateOGPO(){
                 g_cost = data.total_cost;
                 before_total_cost = data.total_cost;
 
-                console.log(data.total_cost);
+                checked_is_kasko = 1;
+                checked_is_is_need_dgpo = 0;
+
+                $('#cancel_additional').prop('checked', false);
+                $('#is_need_kasko').prop('checked', true);
+                $('#is_need_dgpo').prop('checked', false);
+                $('#kasko_cost_label').css('display','block');
+                $('#dgpo_cost_label').css('display','none');
 
                 content = '<button type="button" onclick="showPayContent()" class="button -green -md">Купить</button>';
                 $('#btn_content_modal').html(content);
@@ -288,6 +295,7 @@ function calculateOGPO(){
             }
             g_is_change_new_car = 0;
             g_transport_name = data.transport_name;
+            g_transport_number = data.transport_number;
         }
     });
 }
@@ -612,7 +620,7 @@ function calculateLimitKASKO(){
         driver_grade.push($(this).val());
     });
 
-    if(v_grade < 4){
+    if(v_grade < 3){
         var content = '<div class="calc__total">Ваш класс не подходит, чтобы купить этот полис</div>';
         $('#message_content').html(content);
         return;
@@ -835,13 +843,14 @@ function payPolice(){
             iins: iins,
             before_cost: before_total_cost,
             transport_name: g_transport_name,
+            transport_number: g_transport_number,
             user_name: g_user_name,
             start_date: $('#policy_start_date').val(),
             policy_period: $('#policy_period').val(),
             phone: $('#phone').val(),
             email: $('#email').val(),
-            is_need_kasko: $('#is_need_kasko').is(':checked'),
-            is_need_ogpo_plus: $('#is_need_dgpo').is(':checked')
+            is_need_kasko: checked_is_kasko,
+            is_need_ogpo_plus: checked_is_is_need_dgpo
         },
         success: function (data) {
             $('.ajax-loader').fadeOut();
@@ -900,7 +909,7 @@ function addRequestLimitKASKO() {
         $('#phone_input_error').fadeOut(0);
     }
 
-    if(v_grade < 4){
+    if(v_grade < 3){
         var content = '<div class="calc__total">Ваш класс не подходит, чтобы купить этот полис</div>';
         $('#message_content').html(content);
         return;
@@ -994,7 +1003,7 @@ function showOGPOresult(){
 var checked_is_kasko = 1;
 var kasko_price = 50;
 var checked_is_is_need_dgpo = 0;
-var ogpo_plus_price = 3000;
+var ogpo_plus_price = 100;
 
 $('#is_need_kasko').click(function(){
     if(checked_is_kasko == 0){

@@ -157,19 +157,29 @@ class CalculatorController extends Controller
                 $result['kasko'] = 0;
                 $result['ogpo_plus'] = 0;
 
-                if(isset($result_info['kasko']) && $result_info['kasko'] == 1){
+                if(isset($result_info['actions']) && in_array(1,$result_info['actions'])){
                     $result['ogpo_price'] -= 50;
                     $result['kasko'] = 1;
                 }
 
-                if(isset($result_info['ogpo_plus']) && $result_info['ogpo_plus'] == 1){
-                    $result['ogpo_price'] -= 3000;
+                if(isset($result_info['actions']) && in_array(2,$result_info['actions'])){
+                    $result['ogpo_price'] -= 100;
                     $result['ogpo_plus'] = 1;
                 }
 
+                if($result['kasko'] == 0 && $result['ogpo_plus'] == 0){
+                    $result['kasko'] = 1;
+                    $result['total_cost'] += 50;
+                }
+
                 $result['transport_name'] = 'Ваш транспорт';
-                if(isset($result_info['vehicles'][0])){
+                $result['transport_number'] = '';
+                if(isset($result_info['vehicles'][0]['transport_model'])){
                     $result['transport_name'] = $result_info['vehicles'][0]['transport_model'];
+                }
+
+                if(isset($result_info['vehicles'][0]['transport_number'])){
+                    $result['transport_number'] = $result_info['vehicles'][0]['transport_number'];
                 }
             }
         }
@@ -287,7 +297,7 @@ class CalculatorController extends Controller
     public function calculateKaskoExpress(Request $request)
     {
         if($request->iin != ''){
-            if($request->grade < 4){
+            if($request->grade < 3){
                 $result['status'] = false;
                 $result['error'] = "Ваш класс не подходит, чтобы купить этот полис";
             }
@@ -308,7 +318,7 @@ class CalculatorController extends Controller
         }
     }
 
-    public function calculateAGPO(Request $request)
+    public function calculateOGPO(Request $request)
     {
         if($request->iin != ''){
             $iin = $request->iin;
@@ -342,6 +352,10 @@ class CalculatorController extends Controller
                         $car[$key]['transport_region'] = $request['transport_regions'][$count];
                         $car[$key]['transport_vin'] = $request['transport_vins'][$count];
                         $key++;
+
+                        if($key == 1){
+                            $result['transport_number'] = $car[0]['transport_number'];
+                        }
                     }
                 }
             }
@@ -352,16 +366,15 @@ class CalculatorController extends Controller
             $result['ogpo_price'] = 0;
             $result['total_cost'] = 0;
             $result['kasko_price'] = 50;
-            $result['ogpo_plus_price'] = 3000;
+            $result['ogpo_plus_price'] = 100;
 
-            if(isset($cost_info['kasko_price'])){
+            if(isset($cost_info['price'])){
                 $result['ogpo_price'] = $cost_info['price'];
-                $result['kasko_price'] = $cost_info['kasko_price'];
-                $result['ogpo_plus_price'] = $cost_info['ogpo_plus_price'];
+                $result['total_cost'] = $cost_info['price'] + $result['kasko_price'];
             }
 
             if(isset($cost_info['price'])){
-                $cost_info = $esbd->setCostPolice($iin,$drivers,$cost_info['price'],$request->is_need_kasko,$request->is_need_ogpo_plus);
+                $cost_info = $esbd->setCostPolice($iin,$drivers,$cost_info['price'],1);
 
                 if(isset($cost_info['cost'])){
                     $result['status'] = true;
@@ -408,16 +421,15 @@ class CalculatorController extends Controller
     public function payPolice(Request $request)
     {
         if($request->cost != ''){
-
             $esbd = new ESBDController();
             $res_date = $esbd->setStartDatePolicy($request->iin,$request->start_date,$request->policy_period);
-
-            $result['status_code_0'] = $res_date;
 
             if($request->cost != $request->before_cost){
                 $drivers = $this->getDriverList($request);
 
                 $cost_info = $esbd->setCostPolice($request->iin,$drivers,$request->cost,$request->is_need_kasko,$request->is_need_ogpo_plus);
+
+                $result['status_code_0'] = $cost_info;
 
                 if(!isset($cost_info['cost'])){
                     $result['status'] = false;
@@ -427,7 +439,8 @@ class CalculatorController extends Controller
                 }
             }
 
-            $policy = $this->addPolicуToDatabaseBeforePay($request);
+            $policy_db = new Policy();
+            $policy = $policy_db->addPolicуToDatabaseBeforePay($request);
 
             if($policy == false){
                 $result['status'] = false;
@@ -456,15 +469,14 @@ class CalculatorController extends Controller
         }
     }
 
-    public function confirmPay2(Request $request,$hash,$policy_id)
-    {
-        $file = "log2.txt";
-        file_put_contents($file, $hash);
-    }
-
     public function confirmPay(Request $request,$hash,$policy_id)
     {
         if($policy_id > 0){
+            $file = "log2.txt";
+            $current = file_get_contents($file);
+
+            $current .= $request;
+            file_put_contents($file, $current);
 
             try {
                 $policy = Policy::where('policy_id',$policy_id)->where('hash',$hash)->first();
@@ -473,13 +485,28 @@ class CalculatorController extends Controller
                 elseif($policy->is_pay == 1){
                     Auth::logout();
                     if(Auth::loginUsingId($policy->user_id)){
-                        return redirect('/profile/policy')->with('success', '1');
+                        return redirect('/profile/policy');
                     }
-                    else return redirect('/ogpo?error=Ошибка');
+                    else return redirect('/ogpo?error=Ошибка_при_авторизации');
                 }
-                elseif($policy->is_pay == 2){
-                    return redirect('/ogpo');
+
+                $request->phone = $policy->phone;
+                $request->iin = $policy->iin;
+                $request->user_name = $policy->user_name;
+
+                $user_db = new Users();
+                $result_user = $user_db->addNewUser($request);
+                if($result_user == false){
+                    return redirect('/ogpo?error=Ошибка2');
                 }
+
+                $request->user_id = $result_user['user_id'];
+
+                $policy->user_id = $request->user_id;
+                $policy->hash = $policy->hash.'-0'.$policy->policy_id;
+                $policy->pay_date = date('Y-m-d');
+                $policy->is_pay = 1;
+                $policy->save();
 
                 $iin = $policy->iin;
                 $cost = $policy->cost;
@@ -500,19 +527,15 @@ class CalculatorController extends Controller
                         return response()->json($result);
                     }
 
-                    $request->phone = $policy->phone;
-                    $request->iin = $policy->iin;
-                    $request->user_name = $policy->user_name;
-
-                    $result_user = $this->addNewUser($request);
-                    if($result_user == false){
-                        return redirect('/ogpo?error=Ошибка2');
+                    if(isset($cost_info['policy_start_date']) && $cost_info['policy_finish_date']){
+                        $request->policy_start_date = $cost_info['policy_start_date'];
+                        $request->policy_finish_date = $cost_info['policy_finish_date'];
                     }
 
-                    $request->user_id = $result_user['user_id'];
                     $request->policy_id = $policy_id;
 
-                    $result_db = $this->addPolicуToDatabase($request);
+                    $policy_db = new Policy();
+                    $result_db = $policy_db->updatePolicуAfterPay($request);
 
                     $phone = '7'.Helpers::changePhoneFormat($request->phone);
                     $message = "Полис оформлен! Скачай в личном кабинете на ffins.kz";
@@ -527,14 +550,14 @@ class CalculatorController extends Controller
                         $data['password'] = $result_user['password'];
                     }
 
-                    $result = Helpers::sendSMS($phone,$message);
+                    //$result = Helpers::sendSMS($phone,$message);
 
                     $pdf_file = str_replace('/','',$result_db->pdf_file);
 
                     $platform = 'Freedom E-commerce product v1.0';
                     $UnisenderApi = new UnisenderApi('679qu8sjytxjt4s748bmgiqsxxc7j3qkkka7mj6y', 'UTF-8', 4, null, false, $platform);
 
-                    $result = $UnisenderApi->sendEmail(
+                    /*$result = $UnisenderApi->sendEmail(
                         [   'email' => $result_db->email,
                             'sender_name' => 'Freedom Finance Insurance',
                             'sender_email' => 'mukhtarov@ffins.kz',
@@ -543,7 +566,7 @@ class CalculatorController extends Controller
                             'list_id' => '17072033',
                             'attachments[file.pdf]' => file_get_contents($pdf_file)
                         ]
-                    );
+                    );*/
 
                     Auth::logout();
                     if(Auth::loginUsingId($result_user['user_id'])){
@@ -553,95 +576,15 @@ class CalculatorController extends Controller
                     return redirect('/ogpo?error=Ошибка-на-сайте-или-API-1');
                 }
                 else {
-                    return redirect('/ogpo?error=Ошибка-на-сайте-или-API-2');
+                    Auth::logout();
+                    if(Auth::loginUsingId($policy->user_id)){
+                        return redirect('/profile/policy');
+                    }
                 }
             }
             catch(Exception $ex){
 
             }
-
-        }
-    }
-
-    public function addPolicуToDatabaseBeforePay(Request $request)
-    {
-        $policy = new Policy();
-        $policy->iin = $request->iin;
-        $policy->transport_name = $request->transport_name;
-        $policy->phone = $request->phone;
-        $policy->email = $request->email;
-        $policy->user_name = $request->user_name;
-        $policy->is_pay = 0;
-        $policy->cost = $request->cost;
-        $policy->hash = md5(uniqid(time(), true));
-
-        try {
-            $policy->save();
-
-            return $policy;
-
-        }
-        catch(Exception $ex){
-            return false;
-        }
-    }
-
-    public function addPolicуToDatabase(Request $request)
-    {
-        $decoded = base64_decode($request->base_code);
-        $file = $request->user_id."_".$request->policy_number.'.pdf';
-        file_put_contents($file, $decoded);
-
-        $policy = Policy::where('policy_id',$request->policy_id)->first();
-        if($policy == null) return false;
-
-        $policy->user_id = $request->user_id;
-        $policy->pdf_file = '/'.$file;
-        $policy->base_code = $request->base_code;
-        $policy->policy_number = $request->policy_number;
-        $policy->is_pay = 1;
-
-        try {
-            $policy->save();
-
-            return $policy;
-
-        }
-        catch(Exception $ex){
-            return false;
-        }
-    }
-
-    public function addNewUser(Request $request)
-    {
-        $user = Users::where('phone',$request->phone)->first();
-
-        $is_new_user = 0;
-        $password = '';
-        if($user == null) {
-            $user = new Users();
-            $is_new_user = 1;
-            $password = Str::random(6);
-            $user->password = Hash::make($password);
-            $user->name = $request->user_name;
-            $user->role_id = 3;
-        }
-
-        $user->phone = $request->phone;
-        $user->iin = $request->iin;
-        $user->is_confirm_phone = 1;
-
-        try {
-            $user->save();
-
-            $result['user_id'] = $user->user_id;
-            $result['is_new_user'] = $is_new_user;
-            $result['password'] = $password;
-
-            return $result;
-        }
-        catch(Exception $ex){
-            return false;
         }
     }
 }

@@ -108,7 +108,7 @@
 
 @section('js')
 
-    <script src="/custom/js/esbd.js?v=38"></script>
+    <script src="/custom/js/esbd.js?v=42"></script>
 
     <script>
         g_is_page_limit_kasko = 1;

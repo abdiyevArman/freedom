@@ -13,6 +13,11 @@
       <ul id="sidebarnav" style="padding-bottom: 140px">
         {{--<li class="nav-small-cap">МЕНЮ</li>--}}
         <li>
+          <a class="@if(isset($menu) && $menu == 'policy') active @endif" href="/admin/policy" >
+            <i class="mdi mdi-view-sequential"></i><span class="hide-menu">ОГПО</span>
+          </a>
+        </li>
+        <li>
           <a class="@if(isset($menu) && $menu == 'request-policy-kasko') active @endif" href="/admin/request-policy/kasko?active=1">
             <?php $count = \App\Models\RequestPolicy::where('is_show','=','1')->where('type','=','kasko')->count();?>
             <i class="mdi mdi-view-sequential"></i><span class="hide-menu">КАСКО <span @if($count == 0) style="display: none" @endif class="label label-rounded label-danger">{{$count}}</span></span>
@@ -22,11 +27,6 @@
           <a class="@if(isset($menu) && $menu == 'request-policy-express') active @endif" href="/admin/request-policy/kasko-express?active=1">
             <?php $count = \App\Models\RequestPolicy::where('is_show','=','1')->where('type','=','kasko-express')->count();?>
             <i class="mdi mdi-view-sequential"></i><span class="hide-menu">КАСКО Express <span @if( $count == 0) style="display: none" @endif class="label label-rounded label-danger">{{$count}}</span></span>
-          </a>
-        </li>
-        <li>
-          <a class="@if(isset($menu) && $menu == 'policy') active @endif" href="/admin/policy" >
-            <i class="mdi mdi-view-sequential"></i><span class="hide-menu">ОГПО</span>
           </a>
         </li>
         <li>

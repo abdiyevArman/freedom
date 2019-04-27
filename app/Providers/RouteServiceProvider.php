@@ -43,7 +43,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         if ($request->isMethod('get')) {
             $locale = $request->segment(1);
-            $lang_list = ['ru', 'kk','en'];
+            $lang_list = ['ru', 'kk'];
             if (in_array($locale, $lang_list)) {
                 $this->app->setLocale($locale);
                 setcookie("site_lang", $locale, time() + (86400 * 30), "/");

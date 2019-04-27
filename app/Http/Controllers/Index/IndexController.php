@@ -14,7 +14,6 @@ use App\Models\Users;
 use App\Models\Vacancy;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
 use Unisender\ApiWrapper\UnisenderApi;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Mail;

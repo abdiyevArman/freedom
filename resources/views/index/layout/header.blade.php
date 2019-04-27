@@ -70,7 +70,7 @@ $menu_list = \App\Models\Menu::where('is_show',1)
         <div class="m-menu__lang">
             <a href="{{\App\Http\Helpers::setSessionLang('ru',$request)}}" class="m-menu__lang-link @if($lang == 'ru') -active @endif">Рус</a>
             <a href="{{\App\Http\Helpers::setSessionLang('kk',$request)}}" class="m-menu__lang-link @if($lang == 'kz') -active @endif">Қаз</a>
-            <a href="{{\App\Http\Helpers::setSessionLang('en',$request)}}" class="m-menu__lang-link @if($lang == 'en') -active @endif">Eng</a>
+            {{--<a href="{{\App\Http\Helpers::setSessionLang('en',$request)}}" class="m-menu__lang-link @if($lang == 'en') -active @endif">Eng</a>--}}
         </div>
     </div>
 </div>
@@ -85,7 +85,7 @@ $menu_list = \App\Models\Menu::where('is_show',1)
             <div class="top-links ml-auto">
                 <a href="{{\App\Http\Helpers::setSessionLang('kk',$request)}}" class="top-links__item @if($lang == 'kz') -active @endif">ҚАЗ</a>
                 <a href="{{\App\Http\Helpers::setSessionLang('ru',$request)}}" class="top-links__item @if($lang == 'ru') -active @endif">РУС</a>
-                <a href="{{\App\Http\Helpers::setSessionLang('en',$request)}}" class="top-links__item @if($lang == 'en') -active @endif">ENG</a>
+                {{--<a href="{{\App\Http\Helpers::setSessionLang('en',$request)}}" class="top-links__item @if($lang == 'en') -active @endif">ENG</a>--}}
             </div>
         </div>
     </div>

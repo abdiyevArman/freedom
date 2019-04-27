@@ -16,13 +16,14 @@
       <div class="navbar-header">
         <a class="navbar-brand" href="/">
           <b>
-            <img style="max-width: 200px" src="/static/img/general/logo.svg" alt="homepage" class="dark-logo" />
-            <img style="max-width: 200px" src="/static/img/general/logo.svg" alt="homepage" class="light-logo" />
+            <img style="max-width: 40px" src="/static/img/mini_logo.png" alt="homepage" class="dark-logo" />
+            <img style="max-width: 40px" src="/static/img/mini_logo.png" alt="homepage" class="light-logo" />
           </b>
-
-              {{--          <span>
-                         <img src="/admin/img/logo.png" alt="homepage" class="dark-logo" />
-                         <img src="/admin/img/logo.png" class="light-logo" alt="homepage" /></span>--}} </a>
+          <span>
+           <img style="max-width: 120px" src="/static/img/mini_logo_label.png" alt="homepage" class="dark-logo" />
+           <img style="max-width: 120px" src="/static/img/mini_logo_label.png" class="light-logo" alt="homepage" />
+          </span>
+        </a>
       </div>
 
       <div class="navbar-collapse">

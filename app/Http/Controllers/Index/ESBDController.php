@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Cookie;
-
+use Sujip\Guid\Guid;
 
 
 class ESBDController extends Controller
@@ -213,10 +213,13 @@ class ESBDController extends Controller
 
     public function setCostPolice($iin,$iins,$cost = 0,$is_need_kasko = 0, $is_need_agpo_plus = 0)
     {
+        $actions = array();
+        if($is_need_kasko > 0) $actions[] = 1;
+        if($is_need_agpo_plus > 0) $actions[] = 2;
+
         $data = array(
             'data' => json_encode($iins,true),
-            'kasko' => strval($is_need_kasko),
-            'ogpo_plus' => strval($is_need_agpo_plus),
+            'actions' => json_encode($actions),
             'cost' => $cost
         );
 
@@ -239,12 +242,15 @@ class ESBDController extends Controller
         return $data;
     }
 
-    public function payPolice($iin,$pay)
+    public function payPolice($iin,$pay,$is_first = 1)
     {
+        $guid = new Guid();
+        $guid = $guid->create();
+
         $data = array(
             'device_type' => 2,
             'method' => 2,
-            'trm_guid' => 'cccb913c-6d56-'.rand(1000,9999).'-'.rand(1000,9999).'-143dff3b8ed2',
+            'trm_guid' => $guid,
             'pay' => (int) $pay,
         );
 
@@ -264,6 +270,16 @@ class ESBDController extends Controller
         $res = curl_exec($c);
 
         $data = json_decode($res, TRUE);
+
+        if(!isset($data['success']) || (isset($data['code']) && $data['code'] != '1009002')){
+            if($is_first < 4){
+                return $this->payPolice($iin,$pay,$is_first + 1);
+            }
+            else {
+                return $data;
+            }
+        }
+
         return $data;
     }
 

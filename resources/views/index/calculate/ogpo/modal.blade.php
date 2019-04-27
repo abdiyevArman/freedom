@@ -8,7 +8,7 @@
                     </div>
                     <p>{{Lang::get('app.cost_ogpo')}}: <span class="order__number" id="ogpo_cost"></span></p>
                     <p class="mt-5" id="kasko_cost_label">{{Lang::get('app.cost_kasko_start')}}: <span class="order__number kasko_cost">50 тг.</span></p>
-                    <p class="mt-5" id="dgpo_cost_label" style="display: none">{{Lang::get('app.cost_million_ogpo')}}: <span class="order__number ogpo_plus_cost">3000 тг.</span></p>
+                    <p class="mt-5" id="dgpo_cost_label" style="display: none">{{Lang::get('app.cost_million_ogpo')}}: <span class="order__number ogpo_plus_cost">100 тг.</span></p>
                     <input type="hidden" value="{{date('d.m.Y')}}" id="correct_date"/>
                     <div class="order__title mt-4">{{Lang::get('app.adding_insurance')}}</div>
                    {{-- <p>Добровольные виды страхования вашего авто до <span class="order__number">5 000 000 тг</span></p>--}}
@@ -32,7 +32,7 @@
                                             <span class="order__radio-title">{{Lang::get('app.million_ogpo')}}</span>
                                         <span class="order__radio-subtitle">{!! \App\Http\Helpers::getInfoText(21) !!}</span>
                                         </span>
-                                        <span class="order__radio-sum ogpo_plus_cost">3000 тг</span>
+                                        <span class="order__radio-sum ogpo_plus_cost">100 тг</span>
                                         </span>
                         </label>
                     </div>
@@ -58,7 +58,7 @@
                         <div class="control__group">
                             <label class="order__title">{{Lang::get('app.during_policy')}}</label>
                             <select class="jsSelectPicker" id="policy_period">
-                                <option value="12" selected>1 {{Lang::get('app.month')}}</option>
+                                <option value="12" selected>12 {{Lang::get('app.month')}}</option>
                                 <option value="11">11 {{Lang::get('app.month')}}</option>
                                 <option value="10">10 {{Lang::get('app.month')}}</option>
                                 <option value="9">9 {{Lang::get('app.month')}}</option>

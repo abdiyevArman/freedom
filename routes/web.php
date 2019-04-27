@@ -26,6 +26,7 @@ Route::group([
     Route::post('order/is_show', 'OrderController@changeIsShow');
     Route::resource('order', 'OrderController');
 
+    Route::post('request-policy/excel/{type}', 'RequestPolicyController@exportExcel');
     Route::post('request-policy/is_show', 'RequestPolicyController@changeIsShow');
     Route::get('request-policy/{type}', 'RequestPolicyController@index');
     Route::resource('request-policy', 'RequestPolicyController');
@@ -67,6 +68,7 @@ Route::group([
     Route::post('report/is_show', 'ReportController@changeIsShow');
     Route::resource('report', 'ReportController');
 
+    Route::post('policy/excel', 'PolicyController@exportExcel');
     Route::post('policy/is_show', 'PolicyController@changeIsShow');
     Route::resource('policy', 'PolicyController');
 
@@ -143,6 +145,8 @@ Route::group([
 
     Route::get('search', 'IndexController@showSearch');
 
+    Route::get('policy/{hash}/{pdf}', 'PolicyController@showPolicy');
+
     Route::get('paybox/{hash}/{id}', 'CalculatorController@confirmPay');
 
     Route::any('paybox-result/{hash}/{id}', 'CalculatorController@confirmPay');
@@ -160,7 +164,7 @@ Route::group([
         Route::post('request/policy/kasko-express', 'RequestPolicyController@addRequestPolicyKaskoExpress');
         Route::post('get-info-by-iin', 'CalculatorController@getInfoByIIN');
         Route::post('get-car-info', 'CalculatorController@getInfoCar');
-        Route::post('calc/agpo', 'CalculatorController@calculateAGPO');
+        Route::post('calc/agpo', 'CalculatorController@calculateOGPO');
         Route::post('calc/kasko-express', 'CalculatorController@calculateKaskoExpress');
         Route::post('add-driver', 'CalculatorController@addDriver');
         Route::post('add-car', 'CalculatorController@addCar');
